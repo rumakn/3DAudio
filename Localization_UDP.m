@@ -45,7 +45,7 @@ azimuths = [-80 -65 -55 -45:5:45 55 65 80];
 %50 locations
 elevations = -45 + 5.625 * (0:49);
 
-FileReader = dsp.AudioFileReader('x1.wav', 'SamplesPerFrame', 11050, 'PlayCount', 500);
+FileReader = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', 11050, 'PlayCount', 500);
 
 FilePlayer = dsp.AudioPlayer('QueueDuration', 1, 'BufferSizeSource', 'Property', 'BufferSize', 11050, 'SampleRate', FileReader.SampleRate);
 

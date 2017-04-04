@@ -31,7 +31,7 @@ if isa(PyModule.get('udpclient'),'py.NoneType')
 end
 
 connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
-%connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
+connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 
 duration = 0;
 
@@ -39,18 +39,18 @@ duration = 0;
 hrtf = uigetfile(pwd, 'Please select the hrtf you would like to use');
 load(deblank(sprintf('%s', hrtf)));
 
-%25 locations
-azimuths = [-80 -65 -55 -45:5:45 55 65 80];
-
-%50 locations
-elevations = -45 + 5.625 * (0:49);
-
 soundSource = [0.3; 0.25];
 soundSource2 = [0; 0];
 
 sounds = [soundSource soundSource2];
 
 forward = [0; 1];
+
+%25 locations
+azimuths = [-80 -65 -55 -45:5:45 55 65 80];
+
+%50 locations
+elevations = -45 + 5.625 * (0:49);
 
 FileReader = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', 11050, 'PlayCount', 500);
 
@@ -86,18 +86,17 @@ while (count > 0)
 	%playerPos = (playerPosFro + playerPosBac) / 2;
 	playerPos = playerPosFro;
 	
-	%Calculates the forward vector
-	%forward = playerPosFro - playerPosBac;
+	%Get the vector from the middle of the screen to the mouse pos and
+	%normalizes it
+    directionVec = soundSource - playerPos;
+	directionVec = normc(directionVec);
 	
-	%Get the azimuth angle and elevation index
-	[azAngle, eIndex] = FindAngle(playerPos, forward, soundSource);
-	%Get the correct index for a
-	aIndex = find(azimuths == azAngle,1);
+	aIndex, eIndex = FindAngle();
 	
 	%disp(angle);
     %disp(aIndex);
     
-	%Play the sound
+	%The rest you know
 	wav_left = [];
 	wav_right = [];
 	soundToPlay = [];
@@ -118,8 +117,8 @@ while (count > 0)
 	sig = step(FileReader);
 	sig = sig(:,1);
 	
-	wav_left = conv(left', sig');
-	wav_right = conv(right', sig');
+	wav_left = [conv(left', sig')];
+	wav_right = [conv(right', sig')];
 	
 	soundToPlay(:,1) = wav_left;
 	soundToPlay(:,2) = wav_right;
@@ -132,4 +131,4 @@ end
 fprintf('Average delay is:%f',duration/rounds);
 
 connFront.close();
-%connBack.close();
+connBack.close();

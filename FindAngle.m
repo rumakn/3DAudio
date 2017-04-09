@@ -7,15 +7,19 @@ function [ azAngle, eIndex ] = FindAngle( playerPos, playerFor, soundPos)
 	%normalizes it
     directionVec = soundPos - playerPos;
 	directionVec = normc(directionVec);
+	
+	playerRight = [playerFor(2) -playerFor(1)];
 
 	%Calculates the degree angle between the forward vector and the source
 	%of the sound
 	azAngle = acosd(dot(directionVec, playerFor));
 	
 	%Make the angle negative if it needs to be
-	if (directionVec(1) < 0)
+	if (acosd(dot(directionVec, playerRight)) > 90)
 		azAngle = -azAngle;
 	end
+	
+	disp(azAngle);
 	
 	%In the positive section make the sound come from the front
 	if (azAngle > -90 && azAngle < 90)

@@ -11,9 +11,6 @@ ip = '127.0.0.1';
 % ip = '192.168.86.122';
 port = 18888;
 
-mBIdFront = 26;
-mBIdBack = 27;
-
 % profiling parameters
 rounds = 500;
 count = rounds;
@@ -30,12 +27,15 @@ if isa(PyModule.get('udpclient'),'py.NoneType')
     py.importlib.import_module('udpclient');
 end
 
+mBIdFront = 26;
+mBIdBack = 27;
+
 connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
 connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 
 duration = 0;
 
-%----------------------------------------Matlab Start
+%Get HRTF from files
 hrtf = uigetfile(pwd, 'Please select the hrtf you would like to use');
 load(deblank(sprintf('%s', hrtf)));
 
@@ -45,23 +45,34 @@ azimuths = [-80 -65 -55 -45:5:45 55 65 80];
 %50 locations
 elevations = -45 + 5.625 * (0:49);
 
+%Sound locations
 soundSource1 = [0.0; 0.0];
 soundSource2 = [10.0; 10.0];
 
+%Storing sound locations
 soundSources = {soundSource1, soundSource2};
 
+%Default player direction is forward
 forward = [0; 1];
 
-FileReaderViolin1 = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', 11050, 'PlayCount', 500);
-FileReaderViolin2 = dsp.AudioFileReader('x1.wav', 'SamplesPerFrame', 11050, 'PlayCount', 500);
+%To read the music files
+FileReaderViolin = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', 11050, 'PlayCount', 500);
+FileReaderDiner = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', 11050, 'PlayCount', 500);
 
-FileReaders = {FileReaderViolin1, FileReaderViolin2};
+%x1.wav
 
-FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', 4410, 'SampleRate', FileReaderViolin1.SampleRate);
+FileReaders = {FileReaderViolin, FileReaderDiner};
 
+%Audio player
+FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', 4410, 'SampleRate', FileReaderViolin.SampleRate);
+
+%Default indices
 aIndex = 1;
 eIndex = 49;
-%--------------------------------------------MATLAB end
+
+%overlap sounds
+leftOverlap = [];
+rightOverlap = [];
 
 while (count > 0)
     tic;
@@ -94,7 +105,7 @@ while (count > 0)
 	wav_right = [];
 	soundToPlay = [];
 
-	numSounds = [1:2];
+	numSounds = [1, 2];
 	for i = numSounds
 		%Get the azimuth angle and elevation index
 		[azAngle, eIndex] = FindAngle(playerPos, forward, soundSources{i});
@@ -121,18 +132,18 @@ while (count > 0)
 		wav_left = conv(left', sig');
 		wav_right = conv(right', sig');
 		
-		%if (size(wav_left) > 11050)
-			wav_left = wav_left(1:11050);
-		%end
+		disp(size(wav_left));
+		wav_left = horzcat(leftOverlap, wav_left);
+		wav_right = horzcat(rightOverlap, wav_right);
+		disp(size(wav_left));
 		
-		%if (size(wav_right) > 11050)
-			wav_right = wav_right(1:11050);
-		%end
+		leftOverlap = wav_left(11051:end);
+		rightOverlap = wav_right(11051:end);
+		
+		wav_left = wav_left(1:11050);
+		wav_right = wav_right(1:11050);
 		
 		if (i > 1)
-			disp(size(wav_left'));
-			disp(size(soundToPlay(:,1)));
-			
 			soundToPlay(:,1) =  soundToPlay(:,1) + wav_left';
 			soundToPlay(:,2) =  soundToPlay(:,2) + wav_right';
 		else

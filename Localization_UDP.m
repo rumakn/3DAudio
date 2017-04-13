@@ -14,7 +14,8 @@ port = 18888;
 % profiling parameters
 rounds = 500;
 count = rounds;
-interval = 0.1;
+interval = 0.5;
+rate = 44100;
 
 % add python scripts folder to path, in the repository, the default
 % location of the python scripts locates at '[project_root]/py_scripts'
@@ -56,15 +57,24 @@ soundSources = {soundSource1, soundSource2};
 forward = [0; 1];
 
 %To read the music files
-FileReaderViolin = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', 11050, 'PlayCount', 500);
-FileReaderDiner = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', 11050, 'PlayCount', 500);
+
+
+
+%Make them match
+%Try timer
+%Test 1 sound
+
+
+
+FileReaderViolin = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', rate, 'PlayCount', 500);
+FileReaderDiner = dsp.AudioFileReader('x1.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 
 %x1.wav
 
 FileReaders = {FileReaderViolin, FileReaderDiner};
 
 %Audio player
-FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', 4410, 'SampleRate', FileReaderViolin.SampleRate);
+FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', rate, 'SampleRate', FileReaderViolin.SampleRate);
 
 %Default indices
 aIndex = 1;
@@ -74,12 +84,21 @@ eIndex = 49;
 leftOverlap = [];
 rightOverlap = [];
 
+%Set up Timer
+global coordsFront;
+global coordsBack;
+
+t = timer('TimerFcn', 'coordsFront = connFront.request_position(); coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+
+start(t);
+
+
 while (count > 0)
     tic;
 	
 	count = count - 1;
-    coordsFront = connFront.request_position();
-	coordsBack = connBack.request_position();
+    %coordsFront = connFront.request_position();
+	%coordsBack = connBack.request_position();
 	
     duration = duration + toc;
 	
@@ -105,7 +124,7 @@ while (count > 0)
 	wav_right = [];
 	soundToPlay = [];
 
-	numSounds = [1, 2];
+	numSounds = [1,2];
 	for i = numSounds
 		%Get the azimuth angle and elevation index
 		[azAngle, eIndex] = FindAngle(playerPos, forward, soundSources{i});
@@ -133,15 +152,15 @@ while (count > 0)
 		wav_right = conv(right', sig');
 		
 		disp(size(wav_left));
-		wav_left = horzcat(leftOverlap, wav_left);
-		wav_right = horzcat(rightOverlap, wav_right);
+		%wav_left = horzcat(leftOverlap, wav_left);
+		%wav_right = horzcat(rightOverlap, wav_right);
 		disp(size(wav_left));
 		
-		leftOverlap = wav_left(11051:end);
-		rightOverlap = wav_right(11051:end);
+		leftOverlap = wav_left(rate + 1:end);
+		rightOverlap = wav_right(rate + 1:end);
 		
-		wav_left = wav_left(1:11050);
-		wav_right = wav_right(1:11050);
+		wav_left = wav_left(1:rate);
+		wav_right = wav_right(1:rate);
 		
 		if (i > 1)
 			soundToPlay(:,1) =  soundToPlay(:,1) + wav_left';
@@ -154,10 +173,13 @@ while (count > 0)
 	
 	step(FilePlayer, soundToPlay);
 	
-	pause(interval);
+	%pause(interval);
 end
     
 fprintf('Average delay is:%f',duration/rounds);
 
 connFront.close();
 connBack.close();
+
+stop(t);
+delete(t);

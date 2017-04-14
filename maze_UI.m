@@ -22,7 +22,7 @@ function varargout = maze_UI(varargin)
 
 % Edit the above text to modify the response to help maze_UI
 
-% Last Modified by GUIDE v2.5 06-Apr-2017 14:11:25
+% Last Modified by GUIDE v2.5 13-Apr-2017 20:15:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -51,10 +51,16 @@ function maze_UI_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to maze_UI (see VARARGIN)
-
+handles.guifig = gcf;
 handles.Maze = maze;
+handles.Maze = maze.setSize(handles.Maze, .871,.802);
+handles.counter = 0;
+guidata(hObject, handles);
+handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'BusyMode','Queue','ExecutionMode','FixedRate','Period', .50);
+start(handles.t);
 
-
+g= imread('maze.png');
+imshow(g);
 % Choose default command line output for maze_UI
 handles.output = hObject;
 
@@ -63,7 +69,35 @@ guidata(hObject, handles);
 
 % UIWAIT makes maze_UI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
+    
+end
+end
 
+
+%%% Timer Function
+function TmrFcn(src, event, handles)
+    handles = guidata(handles);
+    hold = handles.Maze;
+    global playerPos;
+    playerPos = [0;0];
+    
+    xPos = playerPos(1);
+    yPos = playerPos(2);
+    
+    disp(xPos);
+    disp(yPos);
+    xPos = maze.convertX(hold,xPos);
+    yPos = maze.convertY(hold,yPos);
+  MatrixPos = get(handles.Person, 'Position');
+    MatrixPos(1) = xPos;
+    MatrixPos(2) = yPos;
+    
+    set(handles.Person,'Position',MatrixPos);
+    
+    handles.counter = handles.counter+1;
+    disp(handles.counter);
+    guidata(handles.guifig,handles);
+end
 
 % --- Outputs from this function are returned to the command line.
 function varargout = maze_UI_OutputFcn(hObject, eventdata, handles) 
@@ -74,10 +108,8 @@ function varargout = maze_UI_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+end
 
-
-g= imread('maze.png');
-imshow(g);
 
 
 
@@ -92,46 +124,133 @@ function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
 holder = handles.Maze;
 
 disp(eventdata.Key);
-xPos = 0;
-yPos = 0;
-
-if strcmp(eventdata.Key , 'leftarrow')
-    if maze.checkWallLeft(holder)
-        xPos = xPos -.1425;
-        holder.IndexJ = holder.IndexJ -1;
-    end
-end
-if strcmp(eventdata.Key , 'rightarrow')
-    if maze.checkWallRight(holder)
-        xPos = xPos +.1425;
-        holder.IndexJ = holder.IndexJ +1;
-    end
-end
-if strcmp(eventdata.Key , 'uparrow')
-    if maze.checkWallTop(holder)
-    yPos = yPos +.155;
-     holder.IndexI = holder.IndexI -1;
-    end
-end
-if strcmp(eventdata.Key , 'downarrow')
-    if maze.checkWallBottom(holder)
-    yPos = yPos -.155;
-    holder.IndexI = holder.IndexI +1;
-    end
-end
 
 MatrixPos = get(handles.Person, 'Position');
 
-x = MatrixPos(1) +xPos;
-y = MatrixPos(2) +yPos;
+xPos = MatrixPos(1);
+yPos = MatrixPos(2);
 
-MatrixPos(1) = x;
-MatrixPos(2) = y;
+if strcmp(eventdata.Key , 'leftarrow')
+     
+       xPos = xPos -(.1425/10);
+        %xPos = xPos +.1425;
+        if( abs((xPos - ((.1425)* (holder.SoundIndexJ-1) + .18))) >= (1/6 * .1425))
+         if( abs((xPos - ((.1425)* (holder.SoundIndexJ-1) + .18))) > (3/4 * .1425))
+                  
+                    holder.SoundIndexJ = holder.SoundIndexJ -1;
+                      disp('sound') ; disp(holder.SoundIndexJ);
+         end
+        end
+        disp(xPos);
+        disp(((.1425)* (holder.IndexJ-1) + .18));
+        if( abs((xPos - ((.1425)* (holder.IndexJ) + .18))) >= (7/6 * .1425))
+            if maze.checkWallLeft(holder)
+                      
+                  
+                    if( abs((xPos - ((.1425)* (holder.IndexJ-1) + .18))) > (1/3 * .1425))
+                  
+                    holder.IndexJ = holder.IndexJ -1;
+                      disp('pos'); disp( holder.IndexJ);
+                    end
+            
+            else
+                disp('hit wall'); disp(holder.IndexJ);
+                xPos = xPos + (.1425/10);
+            end
+        end
+end
+if strcmp(eventdata.Key , 'rightarrow')
+      
+        xPos = xPos +(.1425/10);
+        %xPos = xPos +.1425;
+        if( (xPos - ((.1425)* (holder.SoundIndexJ-1) + .18)) >= (1/6 * .1425))
+         if( (xPos - ((.1425)* (holder.SoundIndexJ-1) + .18)) > (3/4 * .1425))
+                  
+                    holder.SoundIndexJ = holder.SoundIndexJ +1;
+                      disp('sound') ; disp(holder.SoundIndexJ);
+         end
+        end
+        if( (xPos - ((.1425)* (holder.IndexJ-1) + .18)) >= (1/6 * .1425))
+            if maze.checkWallRight(holder)
+                      
+                  
+                    if( (xPos - ((.1425)* (holder.IndexJ-1) + .18)) > (1/3 * .1425))
+                  
+                    holder.IndexJ = holder.IndexJ +1;
+                      disp('pos'); disp( holder.IndexJ);
+                    end
+            
+            else
+                disp('hit wall');
+                disp(holder.IndexJ);
+                xPos = xPos - (.1425/10);
+            end
+        end
+    
+end
+if strcmp(eventdata.Key , 'uparrow')
+    
+        yPos = yPos +(.155/10);
+         if( abs((yPos - ((.155)* (5-holder.SoundIndexI) + .18))) >= (1/6 * .155))
+              if( abs((yPos - ((.155)* (5-holder.SoundIndexI) + .18))) > (3/4 * .155))
+
+                            holder.SoundIndexI = holder.SoundIndexI -1;
+                              disp(holder.SoundIndexI);
+              end
+         end
+        
+        
+        if( abs((yPos - ((.155)* (4-holder.IndexI) + .18))) >= (7/6 * .155))
+            if maze.checkWallTop(holder)
+                         
+                 if( abs((yPos - ((.155)* (5-holder.IndexI) + .18))) > (1/3 * .155))
+                  
+                    holder.IndexI = holder.IndexI -1;
+                      disp(holder.IndexI);
+                 end
+        
+        else
+                disp('hit wall');
+                yPos = yPos - (.155/10);
+            end
+        end
+end
+if strcmp(eventdata.Key , 'downarrow')
+        
+        yPos = yPos -(.155/10);
+        if( abs((yPos - ((.155)* (5-holder.SoundIndexI) + .18))) >= (1/6 * .155))
+            if( abs((yPos - ((.155)* (5-holder.SoundIndexI) + .18))) > (3/4 * .155))
+
+                                holder.SoundIndexI = holder.SoundIndexI +1;
+                                disp(holder.SoundIndexI);
+            end
+        end
+        
+        if( abs((yPos - ((.155)* (6-holder.IndexI) + .18))) >= (7/6 * .155))
+            if maze.checkWallBottom(holder)
+                       
+                        if( abs((yPos - ((.155)* (5-holder.IndexI) + .18))) > (1/3 * .155))
+                  
+                            holder.IndexI = holder.IndexI +1;
+                            disp(holder.IndexI);
+                         end
+        else
+                disp('hit wall');
+                yPos = yPos + (.155/10);
+            end
+        end
+end
+
+
+
+MatrixPos(1) = xPos;
+MatrixPos(2) = yPos;
 set(handles.Person,'Position',MatrixPos);
-Walls = maze.showPos(holder);
-playmusic(Walls);
+%Walls = maze.showPos(holder);
+%playmusic(Walls);
 handles.Maze = holder; 
 guidata(hObject,handles);
+end
 
 
 function [] = playmusic(Walls);
@@ -141,4 +260,15 @@ function [] = playmusic(Walls);
     s=sin(2*pi*f*t);
     soundsc(s,fs);
  
-    
+end
+
+
+% --- Executes during object deletion, before destroying properties.
+function figure1_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+stop(handles.t);
+delete(handles.t);
+end

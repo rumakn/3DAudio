@@ -3,7 +3,22 @@ classdef maze
       properties
         IndexI = 5;
         IndexJ = 3;
+        SoundIndexI = 5;
+        SoundIndexJ = 3;
         Walls = maze.init();
+        
+        
+        maxX = 0;
+        maxY = 0;
+        
+        
+        PlayerXPos = 5;
+        PlayerYPos = 3;
+        intervalX = 0;
+        intervalY = 0;
+        
+        
+        
         
       end
     
@@ -92,6 +107,7 @@ classdef maze
        end
        
        function wallB = checkWallLeft(p)
+           disp(p.IndexI); disp(p.IndexJ);
            if p.Walls(p.IndexI , p.IndexJ).left
                wallB = false;
            else
@@ -124,6 +140,26 @@ classdef maze
                wallB = true;
            end
          end
-       
+         function ret = setSize(p , wid, hei)
+             p.maxX = wid;
+             p.maxY = hei;
+             p.intervalX = wid/5;
+             p.intervalY = hei/5;
+             ret = p;
+         end
+         
+         function value = convertX(p,val)
+             val=val *.57/p.maxX;
+             val = val +.18;
+             value = val;
+         end
+         
+          function value = convertY(p,val)
+             val=val *.62/p.maxY;
+             val = val +.18;
+             value = val;
+         end
+         
+         
     end
 end

@@ -6,6 +6,7 @@
 % 3. The address/ID of the mobile beacon, currently in our LAB the mobile
 % beacon ID is 26. This can be configured in dashboard
 clear;
+maze_UI();
 % connection parameters
 ip = '127.0.0.1';
 % ip = '192.168.86.122';
@@ -87,6 +88,7 @@ rightOverlap = [];
 %Set up Timer
 global coordsFront;
 global coordsBack;
+global playerPos;
 
 t = timer('TimerFcn', 'coordsFront = connFront.request_position(); coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
 
@@ -151,7 +153,7 @@ while (count > 0)
 		wav_left = conv(left', sig');
 		wav_right = conv(right', sig');
 		
-		disp(size(wav_left));
+		%disp(size(wav_left));
 		%wav_left = horzcat(leftOverlap, wav_left);
 		%wav_right = horzcat(rightOverlap, wav_right);
 		disp(size(wav_left));

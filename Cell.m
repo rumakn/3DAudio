@@ -3,7 +3,6 @@ classdef Cell
     %   Detailed explanation goes here
     
     properties
-        
         left = 0;
         right = 0;
         top = 0;

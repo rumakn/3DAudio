@@ -79,7 +79,6 @@ function TmrFcn(src, event, handles)
     handles = guidata(handles);
     hold = handles.Maze;
     global playerPos;
-    playerPos = [0;0];
     
     xPos = playerPos(1);
     yPos = playerPos(2);

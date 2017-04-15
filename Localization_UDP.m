@@ -88,6 +88,7 @@ rightOverlap = [];
 %Set up Timer
 global coordsFront;
 global coordsBack;
+
 global playerPos;
 
 t = timer('TimerFcn', 'coordsFront = connFront.request_position(); coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
@@ -156,7 +157,7 @@ while (count > 0)
 		%disp(size(wav_left));
 		%wav_left = horzcat(leftOverlap, wav_left);
 		%wav_right = horzcat(rightOverlap, wav_right);
-		disp(size(wav_left));
+		%disp(size(wav_left));
 		
 		leftOverlap = wav_left(rate + 1:end);
 		rightOverlap = wav_right(rate + 1:end);

@@ -8,8 +8,8 @@ classdef maze
         Walls = maze.init();
         
         
-        maxX = 0.682;
-        maxY = 0.610;
+        maxX = 0.659;
+        maxY = 0.584;
         
         
         PlayerXPos = 5;

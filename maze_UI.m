@@ -56,7 +56,7 @@ handles.Maze = maze;
 handles.Maze = maze.setSize(handles.Maze, .871,.802);
 handles.counter = 0;
 guidata(hObject, handles);
-handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'BusyMode','Queue','ExecutionMode','FixedRate','Period', .50);
+handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'ExecutionMode','FixedRate','Period', .50);
 start(handles.t);
 
 g= imread('maze.png');
@@ -94,8 +94,10 @@ function TmrFcn(src, event, handles)
     set(handles.Person,'Position',MatrixPos);
     
     handles.counter = handles.counter+1;
-    disp(handles.counter);
+    %disp(handles.counter);
     guidata(handles.guifig,handles);
+	
+	drawnow;
 end
 
 % --- Outputs from this function are returned to the command line.

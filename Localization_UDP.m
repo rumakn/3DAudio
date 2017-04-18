@@ -33,7 +33,7 @@ mBIdFront = 26;
 mBIdBack = 27;
 
 connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
-connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
+%connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 
 duration = 0;
 
@@ -80,7 +80,7 @@ eIndex = 49;
 leftOverlap = [];
 rightOverlap = [];
 
-%Set up Timer
+%Set up Globals
 global coordsFront;
 global coordsBack;
 global playerPos;
@@ -92,10 +92,12 @@ global CellWalls;
 %Dummy values
 CellWalls = [false, true, true, true];
 
-t = timer('TimerFcn', 'coordsFront = connFront.request_position(); coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
-
+%Set up timer
+t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
 start(t);
 
+%t = timer('TimerFcn', 'coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+%start(t);
 
 while (count > 0)
     tic;
@@ -117,12 +119,12 @@ while (count > 0)
 	
 	%Calculate player actualy coordinate from the midpoint of the front
 	%and back
-	playerPos = (playerPosFro + playerPosBac) / 2;
-	%playerPos = playerPosFro;
+	%playerPos = (playerPosFro + playerPosBac) / 2;
+	playerPos = playerPosFro;
 	
 	%Calculates the forward vector
-	forward = playerPosFro - playerPosBac;
-	forward = normc(forward);
+	%forward = playerPosFro - playerPosBac;
+	%forward = normc(forward);
 	
 	%Variable setUp;
 	wav_left = [];
@@ -140,7 +142,10 @@ while (count > 0)
 	
 	for i = 1:4
 		
-		if CellWalls(i)
+		sig = step(FileReaders{i});
+		sig = sig(:,1);
+		
+		if (CellWalls(i) == true)
 			continue;
 		end
 		
@@ -162,10 +167,7 @@ while (count > 0)
 			left = [zeros(size(1:abs(delay))) left'];
 			right = [right' zeros(size(1:abs(delay)))];
 		end
-
-		sig = step(FileReaders{i});
-		sig = sig(:,1);
-
+		
 		wav_left = conv(left', sig');
 		wav_right = conv(right', sig');
 		
@@ -174,13 +176,33 @@ while (count > 0)
 		%wav_right = horzcat(rightOverlap, wav_right);
 		%disp(size(wav_left));
 		
-		leftOverlap = wav_left(rate + 1:end);
-		rightOverlap = wav_right(rate + 1:end);
+		%leftOverlap = wav_left(rate + 1:end);
+		%rightOverlap = wav_right(rate + 1:end);
 		
 		wav_left = wav_left(1:rate);
 		wav_right = wav_right(1:rate);
 		
-		if (i > 1)
+		if (i == 1 || i == 2)
+			if (fracBott < 1/6)
+				wav_left = wav_left * fracBott/(1/6);
+				wav_right = wav_right * fracBott/(1/6);
+				
+			elseif (fracBott > 5/6)
+				wav_left = wav_left * (1 - fracBott)/(1/6);
+				wav_right = wav_right * (1 - fracBott)/(1/6);
+			end
+		else
+			if (fracLeft < 1/6)
+				wav_left = wav_left * fracLeft/(1/6);
+				wav_right = wav_right * fracLeft/(1/6);
+				
+			elseif (fracLeft > 5/6)
+				wav_left = wav_left * (1 - fracLeft)/(1/6);
+				wav_right = wav_right * (1 - fracLeft)/(1/6);
+			end
+		end
+		
+		if (size(soundToPlay) ~= [0,0])
 			soundToPlay(:,1) =  soundToPlay(:,1) + wav_left';
 			soundToPlay(:,2) =  soundToPlay(:,2) + wav_right';
 		else
@@ -197,7 +219,7 @@ end
 fprintf('Average delay is:%f',duration/rounds);
 
 connFront.close();
-connBack.close();
+%connBack.close();
 
 stop(t);
 delete(t);

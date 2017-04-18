@@ -106,7 +106,7 @@ function [ azAngle, eIndex ] = FindAngle( playerPos, playerFor, soundPos)
 			azAngle = -55;
 		elseif (azAngle < -110)
 			azAngle = -65;
-		elseif (azAngle < -90)
+		elseif (azAngle <= -90)
 			azAngle = -80;
 		end
 		

@@ -53,7 +53,7 @@ function maze_UI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to maze_UI (see VARARGIN)
 handles.guifig = gcf;
 handles.Maze = maze;
-handles.Maze = maze.setSize(handles.Maze, 2.211,2.177);
+handles.Maze = maze.setSize(handles.Maze, 1.752,2.693);
 handles.counter = 0;
 guidata(hObject, handles);
 handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'ExecutionMode','FixedRate','Period', .01);
@@ -103,7 +103,7 @@ function TmrFcn(src, event, handles)
     WallBottomPos = ((5 - hold.IndexI) * .149) + .144;
     
     fracLeft = ((xPos - WallLeftPos)/.138);
-    fracBott = ((yPos - WallRightPos)/.149);
+    fracBott = ((yPos - WallBottomPos)/.149);
     
     
     

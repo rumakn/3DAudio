@@ -53,8 +53,10 @@ soundSourceRight = [0; 0];
 soundSourceUp = [0; 0];
 soundSourceDown = [0; 0];
 
+soundSourceExit = [10; 10];
+
 %Storing sound locations
-soundSources = {0.0, 0.0, 0.0, 0.0};
+soundSources = {0.0, 0.0, 0.0, 0.0, 0.0};
 
 %Default player direction is forward
 forward = [0; 1];
@@ -138,15 +140,17 @@ while (count > 0)
 	soundSourceDown = playerPos + [0; -1];
 	
 	%Save them
-	soundSources = {soundSourceLeft, soundSourceRight, soundSourceUp, soundSourceDown};
+	soundSources = {soundSourceLeft, soundSourceRight, soundSourceUp, soundSourceDown, soundSourceExit};
 	
-	for i = 1:4
+	for i = 1:5
 		
 		sig = step(FileReaders{i});
 		sig = sig(:,1);
 		
-		if (CellWalls(i) == true)
-			continue;
+		if (i < 5)
+			if (CellWalls(i) == true)
+				continue;
+			end
 		end
 		
 		%Get the azimuth angle and elevation index
@@ -191,7 +195,19 @@ while (count > 0)
 				wav_left = wav_left * (1 - fracBott)/(1/6);
 				wav_right = wav_right * (1 - fracBott)/(1/6);
 			end
-		else
+			
+			if (i == 1)
+				if (fracLeft > 5/6)
+					wav_left = wav_left * (1-((1-fracBott)/(1/6)));
+					wav_right = wav_right * (1-((1-fracBott)/(1/6)));
+				end
+			else
+				if (fracLeft < 1/6)
+					wav_left = wav_left * (1-(fracBott/(1/6));
+					wav_right = wav_right * (1-fracBott/(1/6));
+				end
+			end
+		elseif (i == 3 || i == 4)
 			if (fracLeft < 1/6)
 				wav_left = wav_left * fracLeft/(1/6);
 				wav_right = wav_right * fracLeft/(1/6);
@@ -199,6 +215,18 @@ while (count > 0)
 			elseif (fracLeft > 5/6)
 				wav_left = wav_left * (1 - fracLeft)/(1/6);
 				wav_right = wav_right * (1 - fracLeft)/(1/6);
+			end
+			
+			if (i == 4)
+				if (fracLeft > 5/6)
+					wav_left = wav_left * (1-((1-fracBott)/(1/6)));
+					wav_right = wav_right * (1-((1-fracBott)/(1/6)));
+				end
+			else
+				if (fracLeft < 1/6)
+					wav_left = wav_left * (1-(fracBott/(1/6));
+					wav_right = wav_right * (1-fracBott/(1/6));
+				end
 			end
 		end
 		

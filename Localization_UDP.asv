@@ -148,28 +148,20 @@ while (count > 0)
 	
 	%Set up to know how loud the rumble should be as player's approach it
 	%and where it's coming from
-	nearEdge = true;
-	distEdgeX = 1;
-	distEdgeY = 1;
+	nearWall = true;
+	distEdgeX = 0;
+	distEdgeY = 0;
 	
 	%Check left and right edges and move the sound to that location
 	%Also checks distance to make sound more intense
-	if (fracLeft < 1/6)
-		if (CellWalls(1))
-			soundSourceRumble = playerPos + [-1; 0];
-		end
-		
-		distEdgeX = fracLeft/(1/6);
-		
-	elseif (fracLeft > 5/6)
-		if (CellWalls(2))
-			soundSourceRumble = playerPos + [1; 0];
-		end
-		
-		distEdgeX = (1-fracLeft)/(1/6);
-		
+	if (fracLeft < 1/6) && CellWalls(1))
+		soundSourceRumble = playerPos + [-1; 0];
+		distEdgeY = fracBott/(1/6);
+	elseif (fracLeft > 5/6 && CellWalls(2))
+		soundSourceRumble = playerPos + [1; 0];
+		distEdgeY = (1-fracBott)/(1/6);
 	else
-		nearEdge = false;
+		nearWall = false;
 	end
 	
 	%Check the bottom and top edges and move the sound towards there
@@ -179,20 +171,19 @@ while (count > 0)
 			soundSourceRumble = playerPos + [0; -1];
 		end
 		
-		distEdgeY = fracBott/(1/6);
+		distEdgeX = fracBott/(1/6);
 		
 	elseif (fracBott > 5/6)
 		if (CellWalls(3))
 			soundSourceRumble = playerPos + [0; 1];
 		end
 		
-		distEdgeY = (1-fracBott)/(1/6);
-		
+		distEdgeX = (1-fracBott)/(1/6);
 	else
-		nearEdge = false;
+		nearWall = false;
 	end
 	
-	if (~nearEdge)
+	if (~nearWall)
 		FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 	end
 	
@@ -251,8 +242,14 @@ while (count > 0)
 		wav_right = wav_right(1:rate);
 		
 		if (i == 1 || i == 2)
-			wav_left = wav_left * distEdgeY;
-			wav_right = wav_right * distEdgeY;
+			if (fracBott < 1/6)
+				wav_left = wav_left * fracBott/(1/6);
+				wav_right = wav_right * fracBott/(1/6);
+				
+			elseif (fracBott > 5/6)
+				wav_left = wav_left * (1 - fracBott)/(1/6);
+				wav_right = wav_right * (1 - fracBott)/(1/6);
+			end
 			
 			if (i == 1)
 				if (fracLeft > 5/6)
@@ -266,8 +263,14 @@ while (count > 0)
 				end
 			end
 		elseif (i == 3 || i == 4)
-			wav_left = wav_left * distEdgeX;
-			wav_right = wav_right * distEdgeX;
+			if (fracLeft < 1/6)
+				wav_left = wav_left * fracLeft/(1/6);
+				wav_right = wav_right * fracLeft/(1/6);
+				
+			elseif (fracLeft > 5/6)
+				wav_left = wav_left * (1 - fracLeft)/(1/6);
+				wav_right = wav_right * (1 - fracLeft)/(1/6);
+			end
 			
 			if (i == 4)
 				if (fracLeft > 5/6)

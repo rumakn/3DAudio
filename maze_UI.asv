@@ -100,10 +100,7 @@ function TmrFcn(src, event, handles)
     
     % GET DIFFERENCES FROM WALLS
     WallLeftPos = ((hold.IndexJ - 1) * .138) + .155;
-    WallBottomPos = ((5 - hold.IndexI) * .149) + .144;
-    
-    fracLeft = ((xPos - WallLeftPos)/.138);
-    fracBott = ((yPos - WallRightPos)/.149);
+    WallBottomPos = ((hold.IndexI
     
     
     

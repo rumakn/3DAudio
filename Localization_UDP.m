@@ -88,8 +88,10 @@ rightOverlap = [];
 %Set up Timer
 global coordsFront;
 global coordsBack;
-
+global fracLeft;
+global fracBott;
 global playerPos;
+global CellWalls;
 
 t = timer('TimerFcn', 'coordsFront = connFront.request_position(); coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
 

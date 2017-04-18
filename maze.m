@@ -8,8 +8,8 @@ classdef maze
         Walls = maze.init();
         
         
-        maxX = 0.659;
-        maxY = 0.584;
+        maxX = 0;
+        maxY = 0;
         
         
         PlayerXPos = 5;
@@ -109,35 +109,35 @@ classdef maze
        function wallB = checkWallLeft(p)
            %disp(p.IndexI); disp(p.IndexJ);
            if p.Walls(p.IndexI , p.IndexJ).left
-               wallB = false;
-           else
                wallB = true;
+           else
+               wallB = false;
            end
        end
        
        
        function wallB = checkWallRight(p)
            if p.Walls(p.IndexI , p.IndexJ).right
-               wallB = false;
-           else
                wallB = true;
+           else
+               wallB = false;
            end
        end
            
        
         function wallB = checkWallTop(p)
            if p.Walls(p.IndexI , p.IndexJ).top
-               wallB = false;
-           else
                wallB = true;
+           else
+               wallB = false;
            end
         end
        
          function wallB = checkWallBottom(p)
            if p.Walls(p.IndexI , p.IndexJ).bottom
-               wallB = false;
-           else
                wallB = true;
+           else
+               wallB = false;
            end
          end
          function ret = setSize(p , wid, hei)

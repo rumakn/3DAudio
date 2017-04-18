@@ -18,6 +18,8 @@ count = rounds;
 interval = 0.5;
 rate = 44100;
 
+beeps = false;
+
 % add python scripts folder to path, in the repository, the default
 % location of the python scripts locates at '[project_root]/py_scripts'
 PyPath = py.sys.path;
@@ -63,18 +65,32 @@ soundSources = {0.0, 0.0, 0.0, 0.0, 0.0};
 %Default player direction is forward
 forward = [0; 1];
 
-%To read the music files
-%Make them match
+%Winner vairable
+global win;
+win = false;
 
-FileReaderUp = dsp.AudioFileReader('3D_Oboe.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
-FileReaderDown = dsp.AudioFileReader('3D_Bassoon.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
-FileReaderLeft = dsp.AudioFileReader('3D_Flute.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
-FileReaderRight = dsp.AudioFileReader('3D_Clarinet.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+%To read the music files
+FileReaderUp;
+FileReaderDown;
+FileReaderLeft;
+FileReaderRight;
+
+if (beeps)
+	FileReaderUp = dsp.AudioFileReader('gToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+	FileReaderDown = dsp.AudioFileReader('bToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+	FileReaderLeft = dsp.AudioFileReader('dToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+	FileReaderRight = dsp.AudioFileReader('fToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+else
+	FileReaderUp = dsp.AudioFileReader('3D_Oboe.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+	FileReaderDown = dsp.AudioFileReader('3D_Bassoon.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+	FileReaderLeft = dsp.AudioFileReader('3D_Flute.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+	FileReaderRight = dsp.AudioFileReader('3D_Clarinet.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+end
 
 FileReaderExit = dsp.AudioFileReader('MiddleC.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 
-FileReaders = {FileReaderLeft, FileReaderRight, FileRseaderUp, FileReaderDown, FileReaderExit, FileReaderRumble};
+FileReaders = {FileReaderLeft, FileReaderRight, FileReaderUp, FileReaderDown, FileReaderExit, FileReaderRumble};
 
 %Audio player
 FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', rate, 'SampleRate', FileReaderUp.SampleRate);
@@ -106,7 +122,7 @@ start(t);
 %t = timer('TimerFcn', 'coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
 %start(t);
 
-while (count > 0)
+while (~win)
     tic;
 	
 	count = count - 1;

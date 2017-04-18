@@ -82,6 +82,8 @@ function TmrFcn(src, event, handles)
     global fracLeft; 
     global fracBott; 
     global CellWalls;
+	
+	global win;
     
     xPos = playerPos(1);
     yPos = playerPos(2);
@@ -97,7 +99,10 @@ function TmrFcn(src, event, handles)
     hold.IndexJ = floor((xPos -.155)/.138) + 1;
     hold.IndexI = 5 - floor((yPos -.144)/.149);
     
-    
+	if (hold.IndexJ == hold.WinIndexJ && hold.IndexI == hold.WinIndexI)
+		win = true;
+	end
+	
     % GET DIFFERENCES FROM WALLS
     WallLeftPos = ((hold.IndexJ - 1) * .138) + .155;
     WallBottomPos = ((5 - hold.IndexI) * .149) + .144;

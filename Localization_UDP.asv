@@ -18,6 +18,8 @@ count = rounds;
 interval = 0.5;
 rate = 44100;
 
+beeps = false;
+
 % add python scripts folder to path, in the repository, the default
 % location of the python scripts locates at '[project_root]/py_scripts'
 PyPath = py.sys.path;
@@ -63,18 +65,31 @@ soundSources = {0.0, 0.0, 0.0, 0.0, 0.0};
 %Default player direction is forward
 forward = [0; 1];
 
-%To read the music files
-%Make them match
+%Winner vairable
+global 
 
-FileReaderUp = dsp.AudioFileReader('3D_Oboe.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
-FileReaderDown = dsp.AudioFileReader('3D_Bassoon.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
-FileReaderLeft = dsp.AudioFileReader('3D_Flute.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
-FileReaderRight = dsp.AudioFileReader('3D_Clarinet.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+%To read the music files
+FileReaderUp;
+FileReaderDown;
+FileReaderLeft;
+FileReaderRight;
+
+if (beeps)
+	FileReaderUp = dsp.AudioFileReader('gToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+	FileReaderDown = dsp.AudioFileReader('bToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+	FileReaderLeft = dsp.AudioFileReader('dToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+	FileReaderRight = dsp.AudioFileReader('fToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
+else
+	FileReaderUp = dsp.AudioFileReader('3D_Oboe.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+	FileReaderDown = dsp.AudioFileReader('3D_Bassoon.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+	FileReaderLeft = dsp.AudioFileReader('3D_Flute.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+	FileReaderRight = dsp.AudioFileReader('3D_Clarinet.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+end
 
 FileReaderExit = dsp.AudioFileReader('MiddleC.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 
-FileReaders = {FileReaderLeft, FileReaderRight, FileRseaderUp, FileReaderDown, FileReaderExit, FileReaderRumble};
+FileReaders = {FileReaderLeft, FileReaderRight, FileReaderUp, FileReaderDown, FileReaderExit, FileReaderRumble};
 
 %Audio player
 FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', rate, 'SampleRate', FileReaderUp.SampleRate);
@@ -148,20 +163,28 @@ while (count > 0)
 	
 	%Set up to know how loud the rumble should be as player's approach it
 	%and where it's coming from
-	nearWall = true;
-	distEdgeX = 0;
-	distEdgeY = 0;
+	nearEdge = true;
+	distEdgeX = 1;
+	distEdgeY = 1;
 	
 	%Check left and right edges and move the sound to that location
 	%Also checks distance to make sound more intense
-	if (fracLeft < 1/6) && CellWalls(1))
-		soundSourceRumble = playerPos + [-1; 0];
-		distEdgeY = fracBott/(1/6);
-	elseif (fracLeft > 5/6 && CellWalls(2))
-		soundSourceRumble = playerPos + [1; 0];
-		distEdgeY = (1-fracBott)/(1/6);
+	if (fracLeft < 1/6)
+		if (CellWalls(1))
+			soundSourceRumble = playerPos + [-1; 0];
+		end
+		
+		distEdgeX = fracLeft/(1/6);
+		
+	elseif (fracLeft > 5/6)
+		if (CellWalls(2))
+			soundSourceRumble = playerPos + [1; 0];
+		end
+		
+		distEdgeX = (1-fracLeft)/(1/6);
+		
 	else
-		nearWall = false;
+		nearEdge = false;
 	end
 	
 	%Check the bottom and top edges and move the sound towards there
@@ -171,24 +194,21 @@ while (count > 0)
 			soundSourceRumble = playerPos + [0; -1];
 		end
 		
-		distEdgeX = fracBott/(1/6);
+		distEdgeY = fracBott/(1/6);
 		
 	elseif (fracBott > 5/6)
 		if (CellWalls(3))
 			soundSourceRumble = playerPos + [0; 1];
 		end
 		
-		distEdgeX = (1-fracBott)/(1/6);
+		distEdgeY = (1-fracBott)/(1/6);
+		
 	else
-		nearWall = false;
-	end
-	
-	if (~nearWall)
-		FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+		nearEdge = false;
 	end
 	
 	%Make the intensity match the one for the closest wall
-	distEdge = max(distEdgeX, distEdgeY);
+	distEdge = max(1-distEdgeX, 1-distEdgeY);
 	
 	%Save them
 	soundSources = {soundSourceLeft, soundSourceRight, soundSourceUp, soundSourceDown, soundSourceExit, soundSourceRumble};
@@ -203,7 +223,8 @@ while (count > 0)
 				continue;
 			end
 		elseif (i == 6)
-			if (~nearWall)
+			if (~nearEdge)
+				FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 				continue;
 			end
 		end
@@ -241,48 +262,27 @@ while (count > 0)
 		wav_left = wav_left(1:rate);
 		wav_right = wav_right(1:rate);
 		
+		%For West/East sounds
 		if (i == 1 || i == 2)
-			if (fracBott < 1/6)
-				wav_left = wav_left * fracBott/(1/6);
-				wav_right = wav_right * fracBott/(1/6);
-				
-			elseif (fracBott > 5/6)
-				wav_left = wav_left * (1 - fracBott)/(1/6);
-				wav_right = wav_right * (1 - fracBott)/(1/6);
-			end
+			wav_left = wav_left * distEdgeY;
+			wav_right = wav_right * distEdgeY;
 			
-			if (i == 1)
-				if (fracLeft > 5/6)
-					wav_left = wav_left * (1-((1-fracBott)/(1/6)));
-					wav_right = wav_right * (1-((1-fracBott)/(1/6)));
-				end
-			else
-				if (fracLeft < 1/6)
-					wav_left = wav_left * (1-(fracBott/(1/6)));
-					wav_right = wav_right * (1-fracBott/(1/6));
-				end
+			if (fracLeft > 5/6 || fracLeft < 1/6)
+				wav_left = wav_left * (1-distEdgeX);
+				wav_right = wav_right * (1-distEdgeX);
 			end
+		
+		%For North/South sounds
 		elseif (i == 3 || i == 4)
-			if (fracLeft < 1/6)
-				wav_left = wav_left * fracLeft/(1/6);
-				wav_right = wav_right * fracLeft/(1/6);
-				
-			elseif (fracLeft > 5/6)
-				wav_left = wav_left * (1 - fracLeft)/(1/6);
-				wav_right = wav_right * (1 - fracLeft)/(1/6);
+			wav_left = wav_left * distEdgeX;
+			wav_right = wav_right * distEdgeX;
+			
+			if (fracBott > 5/6 || fracBott < 1/6)
+				wav_left = wav_left * (1-distEdgeY);
+				wav_right = wav_right * (1-distEdgeY);
 			end
 			
-			if (i == 4)
-				if (fracLeft > 5/6)
-					wav_left = wav_left * (1-((1-fracBott)/(1/6)));
-					wav_right = wav_right * (1-((1-fracBott)/(1/6)));
-				end
-			else
-				if (fracLeft < 1/6)
-					wav_left = wav_left * (1-(fracBott/(1/6)));
-					wav_right = wav_right * (1-fracBott/(1/6));
-				end
-			end
+		%For rumble strip sounds
 		elseif (i == 6)
 			wav_left = wav_left * distEdge;
 			wav_right = wav_right * distEdge;

@@ -3,6 +3,8 @@ classdef maze
       properties
         IndexI = 5;
         IndexJ = 3;
+		IndexWinI = 1;
+		IndexWinJ = 3;
         SoundIndexI = 5;
         SoundIndexJ = 3;
         Walls = maze.init();

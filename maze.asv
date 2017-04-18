@@ -93,10 +93,9 @@ classdef maze
             
             
             Ma(5,2).top = 1;
-            Ma(5,3).bottom = 1;
             Ma(5,3).right = 1;
-            Ma(5,4).left = 1;
-           
+            Ma(5,4).right = 1;
+            Ma(5,5).left = 1;
        end
         
        function WallRet = showPos(p)

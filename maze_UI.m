@@ -59,7 +59,7 @@ guidata(hObject, handles);
 handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'ExecutionMode','FixedRate','Period', .01);
 start(handles.t);
 
-g= imread('maze.png');
+g= imread('newmaze.png');
 imshow(g);
 % Choose default command line output for maze_UI
 handles.output = hObject;

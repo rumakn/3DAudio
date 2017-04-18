@@ -6,7 +6,6 @@
 % 3. The address/ID of the mobile beacon, currently in our LAB the mobile
 % beacon ID is 26. This can be configured in dashboard
 clear;
-maze_UI();
 % connection parameters
 ip = '127.0.0.1';
 % ip = '192.168.86.122';
@@ -35,7 +34,7 @@ mBIdFront = 26;
 mBIdBack = 27;
 
 connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
-%connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
+connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 
 duration = 0;
 
@@ -70,10 +69,10 @@ global win;
 win = false;
 
 %To read the music files
-FileReaderUp;
-FileReaderDown;
-FileReaderLeft;
-FileReaderRight;
+FileReaderUp = 0;
+FileReaderDown = 0;
+FileReaderLeft = 0;
+FileReaderRight = 0;
 
 if (beeps)
 	FileReaderUp = dsp.AudioFileReader('gToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
@@ -114,13 +113,15 @@ global CellWalls;
 
 %Dummy values
 CellWalls = [false, true, true, true];
+playerPos = [0;0];
 
 %Set up timer
-t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
-start(t);
-
-%t = timer('TimerFcn', 'coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+%t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
 %start(t);
+
+maze_UI();
+t = timer('TimerFcn', 'global coordsFront; global coordsBack; coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+start(t);
 
 while (~win)
     tic;
@@ -142,12 +143,12 @@ while (~win)
 	
 	%Calculate player actualy coordinate from the midpoint of the front
 	%and back
-	%playerPos = (playerPosFro + playerPosBac) / 2;
-	playerPos = playerPosFro;
+	playerPos = (playerPosFro + playerPosBac) / 2;
+	%playerPos = playerPosFro;
 	
 	%Calculates the forward vector
-	%forward = playerPosFro - playerPosBac;
-	%forward = normc(forward);
+	forward = playerPosFro - playerPosBac;
+	forward = normc(forward);
 	
 	%Variable setUp;
 	wav_left = [];

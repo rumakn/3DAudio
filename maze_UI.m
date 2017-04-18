@@ -42,7 +42,7 @@ else
     gui_mainfcn(gui_State, varargin{:});
 end
 % End initialization code - DO NOT EDIT
-
+end
 
 % --- Executes just before maze_UI is made visible.
 function maze_UI_OpeningFcn(hObject, eventdata, handles, varargin)
@@ -53,7 +53,7 @@ function maze_UI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to maze_UI (see VARARGIN)
 handles.guifig = gcf;
 handles.Maze = maze;
-handles.Maze = maze.setSize(handles.Maze, 1.752,2.693);
+handles.Maze = maze.setSize(handles.Maze, 4.397,4.223);
 handles.counter = 0;
 guidata(hObject, handles);
 handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'ExecutionMode','FixedRate','Period', .01);
@@ -70,7 +70,6 @@ guidata(hObject, handles);
 % UIWAIT makes maze_UI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
     
-end
 end
 
 
@@ -99,7 +98,7 @@ function TmrFcn(src, event, handles)
     hold.IndexJ = floor((xPos -.155)/.138) + 1;
     hold.IndexI = 5 - floor((yPos -.144)/.149);
     
-	if (hold.IndexJ == hold.WinIndexJ && hold.IndexI == hold.WinIndexI)
+	if (hold.IndexJ == hold.IndexWinJ && hold.IndexI == hold.IndexWinI)
 		win = true;
 	end
 	

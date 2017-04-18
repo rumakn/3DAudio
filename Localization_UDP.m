@@ -69,7 +69,9 @@ FileReaderDown = dsp.AudioFileReader('3D_Bassoon.wav', 'SamplesPerFrame', rate, 
 FileReaderLeft = dsp.AudioFileReader('3D_Flute.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 FileReaderRight = dsp.AudioFileReader('3D_Clarinet.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 
-FileReaders = {FileReaderLeft, FileReaderRight, FileReaderUp, FileReaderDown};
+FileReaderExit = dsp.AudioFileReader('Violin.mp3', 'SamplesPerFrame', rate, 'PlayCount', 500);
+
+FileReaders = {FileReaderLeft, FileReaderRight, FileReaderUp, FileReaderDown, FileReaderExit};
 
 %Audio player
 FilePlayer = dsp.AudioPlayer('QueueDuration', 0, 'BufferSizeSource', 'Property', 'BufferSize', rate, 'SampleRate', FileReaderUp.SampleRate);

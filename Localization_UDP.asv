@@ -48,19 +48,23 @@ azimuths = [-80 -65 -55 -45:5:45 55 65 80];
 elevations = -45 + 5.625 * (0:49);
 
 %Sound locations
-soundSourceLeft = [0; 0];
-soundSourceRight = [0; 0];
-soundSourceUp = [0; 0];
-soundSourceDown = [0; 0];
+soundSourceLeft;
+soundSourceRight;
+soundSourceUp;
+soundSourceDown;
 
 %Storing sound locations
-soundSources = {0.0, 0.0, 0.0, 0.0};
+soundSources;
 
 %Default player direction is forward
 forward = [0; 1];
 
 %To read the music files
+
+
+
 %Make them match
+
 
 FileReaderUp = dsp.AudioFileReader('3D_Oboe.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 FileReaderDown = dsp.AudioFileReader('3D_Bassoon.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
@@ -88,9 +92,6 @@ global playerPos;
 global fracLeft;
 global fracBott;
 global CellWalls;
-
-%Dummy values
-CellWalls = [false, true, true, true];
 
 t = timer('TimerFcn', 'coordsFront = connFront.request_position(); coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
 
@@ -130,20 +131,19 @@ while (count > 0)
 	soundToPlay = [];
 	
 	%Set up sound locations
-	soundSourceLeft = playerPos + [-1; 0];
-	soundSourceRight = playerPos + [1; 0];
-	soundSourceUp = playerPos + [0; 1];
-	soundSourceDown = playerPos + [0; -1];
+	soundSourceLeft = playerPos + [-1; 0]
 	
 	%Save them
 	soundSources = {soundSourceLeft, soundSourceRight, soundSourceUp, soundSourceDown};
 	
+	
 	for i = 1:4
-		
-		if CellWalls(i)
-			continue;
+		if CellWalls(i) == true
+			
 		end
-		
+	end
+	
+	for i = 1:2
 		%Get the azimuth angle and elevation index
 		[azAngle, eIndex] = FindAngle(playerPos, forward, soundSources{i});
 		%Get the correct index for a

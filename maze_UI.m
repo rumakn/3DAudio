@@ -103,7 +103,7 @@ function TmrFcn(src, event, handles)
     WallBottomPos = ((5 - hold.IndexI) * .149) + .144;
     
     fracLeft = ((xPos - WallLeftPos)/.138);
-    fracBott = ((yPos - WallRightPos)/.149);
+    fracBott = ((yPos - WallBottomPos)/.149);
     
     
     

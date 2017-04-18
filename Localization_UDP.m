@@ -14,8 +14,9 @@ port = 18888;
 % profiling parameters
 rounds = 500;
 count = rounds;
-interval = 0.5;
-rate = 44100;
+interval = 0.1;
+rate = 11050;
+%44100;
 
 beeps = false;
 
@@ -34,7 +35,7 @@ mBIdFront = 26;
 mBIdBack = 27;
 
 connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
-connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
+%connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 
 duration = 0;
 
@@ -115,13 +116,14 @@ global CellWalls;
 CellWalls = [false, true, true, true];
 playerPos = [0;0];
 
-%Set up timer
-%t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
-%start(t);
-
 maze_UI();
-t = timer('TimerFcn', 'global coordsFront; global coordsBack; coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+
+%Set up timer
+t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
 start(t);
+
+%t = timer('TimerFcn', 'global coordsFront; global coordsBack; coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+%start(t);
 
 while (~win)
     tic;
@@ -138,17 +140,17 @@ while (~win)
 	playerPosFro = playerPosFro/100;
 	
 	%Gets players back coordinate
-	playerPosBac = [double(coordsBack{1}); double(coordsBack{2})];
-	playerPosBac = playerPosBac/100;
+	%playerPosBac = [double(coordsBack{1}); double(coordsBack{2})];
+	%playerPosBac = playerPosBac/100;
 	
 	%Calculate player actualy coordinate from the midpoint of the front
 	%and back
-	playerPos = (playerPosFro + playerPosBac) / 2;
-	%playerPos = playerPosFro;
+	%playerPos = (playerPosFro + playerPosBac) / 2;
+	playerPos = playerPosFro;
 	
 	%Calculates the forward vector
-	forward = playerPosFro - playerPosBac;
-	forward = normc(forward);
+	%forward = playerPosFro - playerPosBac;
+	%forward = normc(forward);
 	
 	%Variable setUp;
 	wav_left = [];

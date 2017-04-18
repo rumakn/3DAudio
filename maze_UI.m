@@ -53,7 +53,7 @@ function maze_UI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to maze_UI (see VARARGIN)
 handles.guifig = gcf;
 handles.Maze = maze;
-handles.Maze = maze.setSize(handles.Maze, 4.397,4.223);
+handles.Maze = maze.setSize(handles.Maze, 4.256,4.204);
 handles.counter = 0;
 guidata(hObject, handles);
 handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'ExecutionMode','FixedRate','Period', .01);

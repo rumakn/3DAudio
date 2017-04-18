@@ -192,12 +192,8 @@ while (count > 0)
 		nearEdge = false;
 	end
 	
-	if (~nearEdge)
-		FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
-	end
-	
 	%Make the intensity match the one for the closest wall
-	distEdge = max(distEdgeX, distEdgeY);
+	distEdge = max(1-distEdgeX, 1-distEdgeY);
 	
 	%Save them
 	soundSources = {soundSourceLeft, soundSourceRight, soundSourceUp, soundSourceDown, soundSourceExit, soundSourceRumble};
@@ -212,7 +208,8 @@ while (count > 0)
 				continue;
 			end
 		elseif (i == 6)
-			if (~nearWall)
+			if (~nearEdge)
+				FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 				continue;
 			end
 		end
@@ -250,36 +247,27 @@ while (count > 0)
 		wav_left = wav_left(1:rate);
 		wav_right = wav_right(1:rate);
 		
+		%For West/East sounds
 		if (i == 1 || i == 2)
 			wav_left = wav_left * distEdgeY;
 			wav_right = wav_right * distEdgeY;
 			
-			if (i == 1)
-				if (fracLeft > 5/6)
-					wav_left = wav_left * (1-((1-fracBott)/(1/6)));
-					wav_right = wav_right * (1-((1-fracBott)/(1/6)));
-				end
-			else
-				if (fracLeft < 1/6)
-					wav_left = wav_left * (1-(fracBott/(1/6)));
-					wav_right = wav_right * (1-fracBott/(1/6));
-				end
+			if (fracLeft > 5/6 || fracLeft < 1/6)
+				wav_left = wav_left * (1-distEdgeX);
+				wav_right = wav_right * (1-distEdgeX);
 			end
+		
+		%For North/South sounds
 		elseif (i == 3 || i == 4)
 			wav_left = wav_left * distEdgeX;
 			wav_right = wav_right * distEdgeX;
 			
-			if (i == 4)
-				if (fracLeft > 5/6)
-					wav_left = wav_left * (1-((1-fracBott)/(1/6)));
-					wav_right = wav_right * (1-((1-fracBott)/(1/6)));
-				end
-			else
-				if (fracLeft < 1/6)
-					wav_left = wav_left * (1-(fracBott/(1/6)));
-					wav_right = wav_right * (1-fracBott/(1/6));
-				end
+			if (fracBott > 5/6 || fracBott < 1/6)
+				wav_left = wav_left * (1-distEdgeY);
+				wav_right = wav_right * (1-distEdgeY);
 			end
+			
+		%For rumble strip sounds
 		elseif (i == 6)
 			wav_left = wav_left * distEdge;
 			wav_right = wav_right * distEdge;

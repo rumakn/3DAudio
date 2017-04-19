@@ -3,6 +3,8 @@ function [ azAngle, eIndex ] = FindAngle( playerPos, playerFor, soundPos)
 %   Takes player pos and direction and calulcates what precise angle the
 %   hrtf should play from
 
+%Need to change this to interpolation cause right now it's very ham fisted
+
 	%Get the vector from the player to the sound pos and
 	%normalizes it
     directionVec = soundPos - playerPos;

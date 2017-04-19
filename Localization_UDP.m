@@ -31,9 +31,11 @@ if isa(PyModule.get('udpclient'),'py.NoneType')
     py.importlib.import_module('udpclient');
 end
 
+%Beacon IDs
 mBIdFront = 26;
 mBIdBack = 27;
 
+%Open the connection for each beacon
 connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
 connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 
@@ -75,6 +77,7 @@ FileReaderDown = 0;
 FileReaderLeft = 0;
 FileReaderRight = 0;
 
+%Changes the type of sound to test the differences
 if (beeps)
 	FileReaderUp = dsp.AudioFileReader('gToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
 	FileReaderDown = dsp.AudioFileReader('bToneFinal.wav', 'SamplesPerFrame', rate, 'PlayCount', 1000);
@@ -116,18 +119,25 @@ global CellWalls;
 CellWalls = [false, true, true, true];
 playerPos = [0;0];
 
+%Start maze UI and everything it does
 maze_UI();
 
 %Set up timer
+%The timer just updates the coordinates every interval
+
+%Timer for just front
 %t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
 %start(t);
 
+%Timer for front and back
 t = timer('TimerFcn', 'global coordsFront; global coordsBack; coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
 start(t);
 
+%Keep going until the user won
 while (~win)
     tic;
 	
+	%Artifact from old version
 	count = count - 1;
     %coordsFront = connFront.request_position();
 	%coordsBack = connBack.request_position();
@@ -173,13 +183,17 @@ while (~win)
 	
 	%Check left and right edges and move the sound to that location
 	%Also checks distance to make sound more intense
+	
+	%If user is near the left/right edge, check if there's a wall.
+	%If there's a wall then player a rumble sound in that area
+	%Then save the player's distance from the edge [0,1]
+		%0 is at the edge and 1 is 1/6 in the cube
 	if (fracLeft < 1/6)
 		if (CellWalls(1))
 			soundSourceRumble = playerPos + [-1; 0];
 		end
 		
 		distEdgeX = fracLeft/(1/6);
-		
 	elseif (fracLeft > 5/6)
 		if (CellWalls(2))
 			soundSourceRumble = playerPos + [1; 0];
@@ -191,8 +205,10 @@ while (~win)
 		nearEdge = false;
 	end
 	
-	%Check the bottom and top edges and move the sound towards there
-	%Also checks distance to make sound more intense
+	%If user is near the bottom/top edge, check if there's a wall.
+	%If there's a wall then player a rumble sound in that area
+	%Then save the player's distance from the edge [0,1]
+		%0 is at the edge and 1 is 1/6 in the cube
 	if (fracBott < 1/6)
 		if(CellWalls(4))
 			soundSourceRumble = playerPos + [0; -1];
@@ -211,21 +227,33 @@ while (~win)
 		nearEdge = false;
 	end
 	
-	%Make the intensity match the one for the closest wall
+	%Now I want the intensity of the sound to increase as i approach the
+	%wall so i flip the previous distance from Edge
+	%I grab the max of the two because rumble strip should play loudly no
+	%matter which wall you approach
 	distEdge = max(1-distEdgeX, 1-distEdgeY);
 	
-	%Save them
+	%Save the sounds
 	soundSources = {soundSourceLeft, soundSourceRight, soundSourceUp, soundSourceDown, soundSourceExit, soundSourceRumble};
 	
+	%[1:4] refers to the cardinal sound directions [West, East, North, South]
+	%[5] is the location of the exit
+	%[6] is the location of the rumble sound
 	for i = 1:6
 		
+		%Take a step even if we are gonna drop it
+		%This keeps the music in sync
 		sig = step(FileReaders{i});
 		sig = sig(:,1);
 		
+		%if we're doing a cardinal sound and there's a wall in the way
+		%don't play it
 		if (i < 5)
 			if (CellWalls(i) == true)
 				continue;
 			end
+		%Sound location is always played so no if statement to control it
+		%The rumble strip should only play when near an edge
 		elseif (i == 6)
 			if (~nearEdge)
 				%FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
@@ -255,27 +283,39 @@ while (~win)
 		wav_left = conv(left', sig');
 		wav_right = conv(right', sig');
 		
-		%disp(size(wav_left));
+		%dTried overlap to clean up the sounds but didn't work
 		%wav_left = horzcat(leftOverlap, wav_left);
 		%wav_right = horzcat(rightOverlap, wav_right);
-		%disp(size(wav_left));
-		
+
 		%leftOverlap = wav_left(rate + 1:end);
 		%rightOverlap = wav_right(rate + 1:end);
 		
+		%This forces all the sound to be the same size
 		wav_left = wav_left(1:rate);
 		wav_right = wav_right(1:rate);
 		
+		%Some improvement for this section (For future work)
+		%As you apprach a direction, make a sound come from the opposite
+			%direction get stronger for smoother transition
+		%Check for walls and don't skip sounds above so hastily
+		
 		%For West/East sounds
 		if (i == 1 || i == 2)
+			%Weaken the East Weast sounds as you approach the upper or
+			%lower border
+			%This is to stop people from walking on top of walls
 			wav_left = wav_left * distEdgeY;
 			wav_right = wav_right * distEdgeY;
 			
+			%This is meant to start playing the sound of the cell you're in
+			%as you leave it to make it less jarring when enter the next
+			%cell
 			if (fracLeft > 5/6 || fracLeft < 1/6)
 				wav_left = wav_left * (1-distEdgeX);
 				wav_right = wav_right * (1-distEdgeX);
 			end
 		
+		%Same ideas as above
 		%For North/South sounds
 		elseif (i == 3 || i == 4)
 			wav_left = wav_left * distEdgeX;
@@ -287,11 +327,13 @@ while (~win)
 			end
 			
 		%For rumble strip sounds
+		%Rumble strips get louder as you get close to an edge
 		elseif (i == 6)
 			wav_left = wav_left * distEdge;
 			wav_right = wav_right * distEdge;
 		end
 		
+		%Make sure soundToPlay is populated atleast once
 		if (size(soundToPlay) ~= [0,0])
 			soundToPlay(:,1) =  soundToPlay(:,1) + wav_left';
 			soundToPlay(:,2) =  soundToPlay(:,2) + wav_right';
@@ -301,6 +343,7 @@ while (~win)
 		end
 	end
 	
+	%Play that sound
 	step(FilePlayer, soundToPlay);
 	
 	%pause(interval);
@@ -308,6 +351,7 @@ end
     
 fprintf('Average delay is:%f',duration/rounds);
 
+%Clean up
 connFront.close();
 connBack.close();
 

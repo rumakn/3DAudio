@@ -1,19 +1,24 @@
 classdef maze
     
       properties
+          %current location within the maze as (I,J)
         IndexI = 5;
         IndexJ = 3;
+        %set winning index position
 		IndexWinI = 1;
 		IndexWinJ = 3;
+        
+        %variables used for testing
         SoundIndexI = 5;
         SoundIndexJ = 3;
+        %initializes the current maze walls
         Walls = maze.init();
         
-        
+        %max X and max Y of real world space
         maxX = 0;
         maxY = 0;
         
-        
+        %testing variables 
         PlayerXPos = 5;
         PlayerYPos = 3;
         intervalX = 0;
@@ -27,10 +32,10 @@ classdef maze
       
     methods (Static)  
        function Ma = init()
-   
+            %double array of cells
             Ma(5,5) = Cell;
 
-            %define the border
+            %define the border walls
             Ma(1,1).left = 1;
             Ma(2,1).left = 1;
             Ma(3,1).left = 1;
@@ -102,17 +107,16 @@ classdef maze
        end
         
        function WallRet = showPos(p)
-           %disp(p.IndexI);
-           %disp(p.IndexJ);
+           %show values of current cell position
            WallRet = [0;0;0;0]
            WallRet(1) = p.Walls(p.IndexI , p.IndexJ).left;
            WallRet(2) = p.Walls(p.IndexI , p.IndexJ).right;
            WallRet(3) = p.Walls(p.IndexI , p.IndexJ).top;
            WallRet(4) = p.Walls(p.IndexI , p.IndexJ).bottom;
        end
-       
+       %check which walls are there and which aren't
        function wallB = checkWallLeft(p)
-           %disp(p.IndexI); disp(p.IndexJ);
+           
            if p.Walls(p.IndexI , p.IndexJ).left
                wallB = true;
            else
@@ -145,6 +149,8 @@ classdef maze
                wallB = false;
            end
          end
+         %set the size of the real world space and set the size of each
+         %cell based on the max values
          function ret = setSize(p , wid, hei)
              p.maxX = wid;
              p.maxY = hei;
@@ -153,6 +159,7 @@ classdef maze
              ret = p;
          end
          
+         %convert from real world to virtual world space 
          function value = convertX(p,val)
              val=val *.57/p.maxX;
              val = val +.18;

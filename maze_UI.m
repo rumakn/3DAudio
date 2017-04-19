@@ -52,13 +52,18 @@ function maze_UI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to maze_UI (see VARARGIN)
 handles.guifig = gcf;
+%create a new maze object that will hold the wall information
 handles.Maze = maze;
-handles.Maze = maze.setSize(handles.Maze, 4.256,4.204);
+%set values in the maze object to reflect the real world maze size
+%setSize(maze object, x max , y max)
+handles.Maze = maze.setSize(handles.Maze, 7.000,4.210);
 handles.counter = 0;
 guidata(hObject, handles);
+%creates a timer function to grab the player location and draw onto the gui
 handles.t = timer('TimerFcn',{@TmrFcn,handles.guifig},'ExecutionMode','FixedRate','Period', .01);
 start(handles.t);
 
+%adds an image to the gui of the current maze 
 g= imread('newmaze.png');
 imshow(g);
 % Choose default command line output for maze_UI
@@ -75,8 +80,10 @@ end
 
 %%% Timer Function
 function TmrFcn(src, event, handles)
+    %gets the handles and holds the maze object
     handles = guidata(handles);
     hold = handles.Maze;
+    %variables from localization that will be updated in this function
     global playerPos;
     global fracLeft; 
     global fracBott; 
@@ -84,25 +91,35 @@ function TmrFcn(src, event, handles)
 	
 	global win;
     
+    %if statement for error catching
+    if (numel(playerPos) ~= 0)
+        %grab player position from real world
     xPos = playerPos(1);
     yPos = playerPos(2);
     
+    %converts the real world position into virtual space using the max x
+    %and max y set above
     xPos = maze.convertX(hold,xPos);
     yPos = maze.convertY(hold,yPos);
     
-   
+   %grabs the player square position on the gui
     MatrixPos = get(handles.Person, 'Position');
+    %adds an offset so that the player position is the same as the square's
+    %center (matlab draws from left bottom corner)
     MatrixPos(1) = xPos - (.07/2);
     MatrixPos(2) = yPos - (.07/2);
     
+    %finds the current cell that the player is inside 
+    %subtracts the location of the bottom left corner of maze and divides
+    %by the size of each cell, +1 because matlab starts at 1 for arrays
     hold.IndexJ = floor((xPos -.155)/.138) + 1;
     hold.IndexI = 5 - floor((yPos -.144)/.149);
-    
+    %if you are in the exit cell, win condition is true
 	if (hold.IndexJ == hold.IndexWinJ && hold.IndexI == hold.IndexWinI)
 		win = true;
 	end
 	
-    % GET DIFFERENCES FROM WALLS
+    % GET DIFFERENCES FROM WALLS as fractions
     WallLeftPos = ((hold.IndexJ - 1) * .138) + .155;
     WallBottomPos = ((5 - hold.IndexI) * .149) + .144;
     
@@ -112,7 +129,7 @@ function TmrFcn(src, event, handles)
     
     
     
-    % gives cell walls
+    % gives cell walls of current cell location as array 
     CellWalls = [false;false;false;false];
     CellWalls(1) = maze.checkWallLeft(hold);
     CellWalls(2) = maze.checkWallRight(hold);
@@ -129,7 +146,7 @@ function TmrFcn(src, event, handles)
     guidata(handles.guifig,handles);
 	
 	drawnow;
-    
+    end
 end
 
 
@@ -157,7 +174,8 @@ function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 hold = handles.Maze;
-
+% Used for testing, arrow keys show which walls are currently free and
+% which cell the GUI thinks you are in. 
 if strcmp(eventdata.Key , 'leftarrow')
     disp(hold.IndexI);
     disp(hold.IndexJ);
@@ -182,6 +200,7 @@ end
 
 
 function [] = playmusic(Walls);
+%testing music when first making GUI
     f=130.81;
     fs=44100;
     t=0:1/fs:1;
@@ -197,7 +216,7 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
+%deletes the timer function
 stop(handles.t);
 delete(handles.t);
 end

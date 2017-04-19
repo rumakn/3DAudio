@@ -18,7 +18,7 @@ interval = 0.1;
 rate = 11050;
 %44100;
 
-beeps = false;
+beeps = true;
 
 % add python scripts folder to path, in the repository, the default
 % location of the python scripts locates at '[project_root]/py_scripts'
@@ -35,7 +35,7 @@ mBIdFront = 26;
 mBIdBack = 27;
 
 connFront = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdFront));
-%connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
+connBack = py.udpclient.udp_factory(ip,uint16(port),uint16(mBIdBack));
 
 duration = 0;
 
@@ -55,7 +55,7 @@ soundSourceRight = [0; 0];
 soundSourceUp = [0; 0];
 soundSourceDown = [0; 0];
 
-soundSourceExit = [10; 10];
+soundSourceExit = [3.46; 3.3];
 
 soundSourceRumble = [0; 0];
 
@@ -119,11 +119,11 @@ playerPos = [0;0];
 maze_UI();
 
 %Set up timer
-t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
-start(t);
-
-%t = timer('TimerFcn', 'global coordsFront; global coordsBack; coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+%t = timer('TimerFcn', 'global coordsFront; coordsFront = connFront.request_position();','ExecutionMode','FixedRate','Period', interval);
 %start(t);
+
+t = timer('TimerFcn', 'global coordsFront; global coordsBack; coordsFront = connFront.request_position();coordsBack = connBack.request_position();','ExecutionMode','FixedRate','Period', interval);
+start(t);
 
 while (~win)
     tic;
@@ -140,17 +140,17 @@ while (~win)
 	playerPosFro = playerPosFro/100;
 	
 	%Gets players back coordinate
-	%playerPosBac = [double(coordsBack{1}); double(coordsBack{2})];
-	%playerPosBac = playerPosBac/100;
+	playerPosBac = [double(coordsBack{1}); double(coordsBack{2})];
+	playerPosBac = playerPosBac/100;
 	
 	%Calculate player actualy coordinate from the midpoint of the front
 	%and back
-	%playerPos = (playerPosFro + playerPosBac) / 2;
-	playerPos = playerPosFro;
+	playerPos = (playerPosFro + playerPosBac) / 2;
+	%playerPos = playerPosFro;
 	
 	%Calculates the forward vector
-	%forward = playerPosFro - playerPosBac;
-	%forward = normc(forward);
+	forward = playerPosFro - playerPosBac;
+	forward = normc(forward);
 	
 	%Variable setUp;
 	wav_left = [];
@@ -228,7 +228,7 @@ while (~win)
 			end
 		elseif (i == 6)
 			if (~nearEdge)
-				FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
+				%FileReaderRumble = dsp.AudioFileReader('RumbleStrip.wav', 'SamplesPerFrame', rate, 'PlayCount', 500);
 				continue;
 			end
 		end
@@ -309,7 +309,7 @@ end
 fprintf('Average delay is:%f',duration/rounds);
 
 connFront.close();
-%connBack.close();
+connBack.close();
 
 stop(t);
 delete(t);

@@ -56,7 +56,7 @@ handles.guifig = gcf;
 handles.Maze = maze;
 %set values in the maze object to reflect the real world maze size
 %setSize(maze object, x max , y max)
-handles.Maze = maze.setSize(handles.Maze, 7.000,4.210);
+handles.Maze = maze.setSize(handles.Maze, 0.813,0.930);
 handles.counter = 0;
 guidata(hObject, handles);
 %creates a timer function to grab the player location and draw onto the gui

@@ -23,10 +23,6 @@ classdef maze
         PlayerYPos = 3;
         intervalX = 0;
         intervalY = 0;
-        
-        
-        
-        
       end
     
       
@@ -48,7 +44,6 @@ classdef maze
             Ma(4,5).right = 1;
             Ma(5,5).right = 1;
             
-            
             Ma(1,1).top = 1;
             Ma(1,2).top = 1;
             Ma(1,4).top = 1;
@@ -66,9 +61,6 @@ classdef maze
             Ma(1,3).left = 1;
             Ma(1,4).bottom = 1;
             
-            
-            
-            
             Ma(2,2).top = 1;
             Ma(2,2).bottom = 1;
             Ma(2,3).top = 1;
@@ -76,7 +68,6 @@ classdef maze
             Ma(2,4).top = 1;
             Ma(2,4).bottom = 1;
             Ma(2,5).bottom = 1;
-            
             
             Ma(3,1).bottom = 1;
             Ma(3,2).top = 1;
@@ -88,7 +79,6 @@ classdef maze
             Ma(3,4).bottom = 1;
             Ma(3,5).top = 1;
             
-            
             Ma(4,1).top = 1;
             Ma(4,2).bottom = 1;
             Ma(4,2).right = 1;
@@ -98,12 +88,10 @@ classdef maze
             Ma(4,4).right = 1;
             Ma(4,5).left = 1;
             
-            
             Ma(5,2).top = 1;
             Ma(5,3).bottom = 1;
             Ma(5,3).right = 1;
             Ma(5,4).left = 1;
-           
        end
         
        function WallRet = showPos(p)
